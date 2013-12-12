@@ -63,7 +63,7 @@
                    (get-in conn [:opts :username])))
     (let [content (get-in message [:message :content])
           forms (extract-forms content)
-          reply (interpose "\n" (map #(str % "\n" "=> " (sb (read-string %))) forms))]
+          reply (interpose "\n" (map #(str % "\n" "=> " (sb (read-string %)) "\n") forms))]
       (respond message (apply str reply)))))
 
 (defn -main []
