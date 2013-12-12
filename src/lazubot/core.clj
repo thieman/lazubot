@@ -19,7 +19,8 @@
   (zulip/sync* (zulip/add-subscriptions conn bot-streams)))
 
 (defn respond [message reply]
-  (let [parsed-reply (if (seq? reply) (str (seq reply)) (str reply))]
+  (let [str-reply (if (seq? reply) (str (seq reply)) (str reply))
+        parsed-reply (str "~~~clojure\n" str-reply "\n~~~")]
     (if (= "private" (get-in message [:message :type]))
       (zulip/send-private-message conn
                                   (map :email (get-in message [:message :display_recipient]))
