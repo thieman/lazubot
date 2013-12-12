@@ -57,13 +57,19 @@
         (recur (rest input) (str current-form current-char) forms
                false inside-quote? depth)))))
 
+(defn eval-form [form]
+  (try
+    (sb (read-string form))
+    (catch Exception e
+      e)))
+
 (defn process-message [message]
   (when (and (= "message" (:type message))
              (not= (get-in message [:message :sender_email])
                    (get-in conn [:opts :username])))
     (let [content (get-in message [:message :content])
           forms (extract-forms content)
-          reply (interpose "\n" (map #(str % "\n" "=> " (sb (read-string %)) "\n") forms))]
+          reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) forms))]
       (respond message (apply str reply)))))
 
 (defn -main []
