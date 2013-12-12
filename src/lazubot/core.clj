@@ -30,13 +30,41 @@
                                  (get-in message [:message :subject])
                                  parsed-reply))))
 
+(defn extract-forms
+  "Return a seq of suspected Clojure forms from a message."
+  [content]
+  (loop [input content
+         current-form ""
+         forms (vector)
+         inside-escape? false
+         inside-quote? false
+         depth 0]
+    (let [current-char (first input)]
+      (case current-char
+        nil forms
+        \( (recur (rest input) (str (if (zero? depth) "" current-form) current-char) forms
+                  inside-escape? inside-quote? (inc depth))
+        \) (when (and (not inside-escape?) (not inside-quote?))
+             (if (= depth 1)
+               (recur (rest input) "" (conj forms (str current-form current-char))
+                      inside-escape? inside-quote? (dec depth))
+               (recur (rest input) (str current-form current-char) forms
+                      inside-escape? inside-quote? (max 0 (dec depth)))))
+        \" (recur (rest input) (str current-form current-char) forms
+                  false (if inside-escape? inside-quote? (not inside-quote?)) depth)
+        \\ (recur (rest input) (str current-form current-char) forms
+                  (not inside-escape?) inside-quote? depth)
+        (recur (rest input) (str current-form current-char) forms
+               false inside-quote? depth)))))
+
 (defn process-message [message]
   (when (and (= "message" (:type message))
              (not= (get-in message [:message :sender_email])
                    (get-in conn [:opts :username])))
-    (let [content (get-in message [:message :content])]
-      (when (= (first "(") (first content))
-        (respond message (sb (read-string content)))))))
+    (let [content (get-in message [:message :content])
+          forms (extract-forms content)
+          reply (interpose "\n" (map #(str "=> " (sb (read-string %))) forms))]
+      (respond message (apply str reply)))))
 
 (defn -main []
   (ensure-subscriptions)
