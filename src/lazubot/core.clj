@@ -1,6 +1,7 @@
 (ns lazubot.core
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :refer [warn]]
+            [clojure.set :refer [difference]]
             [clojure.core.async :as async]
             [clojure-zulip.core :as zulip]
             [clojail.core :refer [sandbox]]
@@ -11,12 +12,16 @@
               (read (PushbackReader. r))))
 (def conn (zulip/connection config))
 (def bot-streams ["test-stream" "clojure" "ClojureScript Compiler"
-                  "code review" "commits" "Victory"])
+                  "code review" "Victory"])
 (def num-goroutines 10)
 (def sb (sandbox secure-tester))
 
 (defn ensure-subscriptions []
-  (zulip/sync* (zulip/add-subscriptions conn bot-streams)))
+  (zulip/sync* (zulip/add-subscriptions conn bot-streams))
+  (let [current-subs (set (map :name (:subscriptions (zulip/sync* (zulip/subscriptions conn)))))
+        remove-subs (difference current-subs (set bot-streams))]
+    (when (seq remove-subs)
+      (zulip/sync* (zulip/remove-subscriptions conn remove-subs)))))
 
 (defn respond [message reply]
   (let [str-reply (if (seq? reply) (str (seq reply)) (str reply))
@@ -68,9 +73,10 @@
              (not= (get-in message [:message :sender_email])
                    (get-in conn [:opts :username])))
     (let [content (get-in message [:message :content])
-          forms (extract-forms content)
-          reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) forms))]
-      (respond message (apply str reply)))))
+          forms (extract-forms content)]
+      (when (seq forms)
+        (let [reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) forms))]
+          (respond message (apply str reply)))))))
 
 (defn -main []
   (ensure-subscriptions)
