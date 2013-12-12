@@ -68,14 +68,23 @@
     (catch Exception e
       e)))
 
+(defn allowed-form?
+  "Return bool of whether a form is contained within a code block."
+  [content form]
+  (let [regexes [(re-pattern (str "~~~(.|\\n)*\\Q" form "\\E(.|\\n)*~~~"))
+                 (re-pattern (str "'\\Q" form "\\E"))
+                 (re-pattern (str "`(.|\\n)*\\Q" form "\\E(.|\\n)*`"))]]
+    (some #(re-find % content) regexes)))
+
 (defn process-message [message]
   (when (and (= "message" (:type message))
              (not= (get-in message [:message :sender_email])
                    (get-in conn [:opts :username])))
     (let [content (get-in message [:message :content])
-          forms (extract-forms content)]
-      (when (seq forms)
-        (let [reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) forms))]
+          forms (extract-forms content)
+          allowed-forms (filter (partial allowed-form? content) forms)]
+      (when (seq allowed-forms)
+        (let [reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) allowed-forms))]
           (respond message (apply str reply)))))))
 
 (defn -main []
