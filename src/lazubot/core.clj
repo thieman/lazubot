@@ -11,8 +11,7 @@
 (def config (with-open [r (io/reader (io/resource "private/config"))]
               (read (PushbackReader. r))))
 (def conn (zulip/connection config))
-(def bot-streams ["test-stream" "clojure" "ClojureScript Compiler"
-                  "code review" "Victory"])
+(def bot-streams ["test-stream"])
 (def num-goroutines 10)
 (def sb (sandbox secure-tester))
 
