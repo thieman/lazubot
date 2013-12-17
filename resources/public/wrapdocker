@@ -83,3 +83,6 @@ then
 else
 	docker -d &
 fi
+
+cd /lazubot
+lein with-profile master run
