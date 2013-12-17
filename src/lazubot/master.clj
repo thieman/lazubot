@@ -1,11 +1,11 @@
 (ns lazubot.master
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :refer [sh]]
             [clojure.tools.logging :refer [warn]]
             [clojure.set :refer [difference]]
-            [clojure.core.async :as async]
+            [clojure.core.async :refer [<! >! go chan sliding-buffer]]
             [clojure-zulip.core :as zulip]
-            [clojail.core :refer [sandbox]]
-            [clojail.testers :refer [secure-tester]])
+            [com.keminglabs.zmq-async.core :refer [register-socket!]])
   (:import [java.io PushbackReader]))
 
 (def config (with-open [r (io/reader (io/resource "private/config"))]
@@ -13,7 +13,18 @@
 (def conn (zulip/connection config))
 (def bot-streams ["test-stream"])
 (def num-goroutines 10)
-(def sb (sandbox secure-tester))
+
+(defn open-socket []
+  (let [addr "tcp://127.0.0.1:8080"
+        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 10)))]
+    (register-socket! {:in request-in :out request-out :socket-type :req
+                       :configurator (fn [socket] (.bind socket addr))})
+    (sh "wrapdocker")
+    (sh "docker" "run" "-rm=true" "-t" "-i" "-name client" "-link master:linked-master"
+        "thieman/clojure" "lein with-profile worker run")
+    (go
+     (>! request-in "hello there socket!")
+     (println (<! request-out)))))
 
 (defn ensure-subscriptions []
   (zulip/sync* (zulip/add-subscriptions conn bot-streams))
@@ -88,12 +99,13 @@
 
 (defn -main []
   (ensure-subscriptions)
+  (open-socket)
   (let [queue-id (:queue_id (zulip/sync* (zulip/register conn ["message"])))
         messages (zulip/subscribe-events conn queue-id)]
     (dotimes [n num-goroutines]
-      (async/go (loop []
+      (go (loop []
                   (try
-                    (process-message (async/<! messages))
+                    (process-message (<! messages))
                     (catch Exception e
                       (warn e)))
                   (recur)))))
