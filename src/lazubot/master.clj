@@ -5,6 +5,7 @@
             [clojure.set :refer [difference]]
             [clojure.core.async :refer [<! >! go chan sliding-buffer]]
             [clojure-zulip.core :as zulip]
+            [clojail.core :refer [sandbox]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]])
   (:import [java.io PushbackReader]))
 
