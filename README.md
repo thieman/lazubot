@@ -2,6 +2,16 @@
 
 A Zulip bot that runs Clojure code. Currently stalking around Hacker School.
 
+## Deploying
+
+Lazubot can be deployed using [Docker](http://www.docker.io/).
+
+```
+git clone git@github.com:tthieman/lazubot
+docker build -t lazubot lazubot
+docker run lazubot
+```
+
 ## License
 
 Copyright © 2013 Travis Thieman
