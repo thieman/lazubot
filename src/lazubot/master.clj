@@ -20,9 +20,9 @@
         [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 10)))]
     (register-socket! {:in request-in :out request-out :socket-type :req
                        :configurator (fn [socket] (.bind socket addr))})
-    (sh "wrapdocker")
+    (sh "docker" "build" "-t lazubot-worker" "-" "<" "/lazubot/resources/public/WorkerDockerfile")
     (sh "docker" "run" "-rm=true" "-t" "-i" "-name client" "-link master:linked-master"
-        "thieman/clojure" "lein with-profile worker run")
+        "lazubot-worker" "lein with-profile worker run")
     (go
      (>! request-in "hello there socket!")
      (println (<! request-out)))))

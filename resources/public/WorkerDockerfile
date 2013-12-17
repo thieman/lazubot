@@ -1,13 +1,18 @@
 FROM thieman/clojure
 MAINTAINER Travis Thieman, travis.thieman@gmail.com
 
-RUN apt-get update
-RUN apt-get install libzmq-dev -y
-
-RUN git clone https://github.com/tthieman/lazubot.git
+RUN git clone -b split https://github.com/tthieman/lazubot.git
 WORKDIR /lazubot
+ENV LEIN_ROOT 1
+RUN cd /lazubot; lein deps
+
+# ZMQ
+RUN add-apt-repository -y ppa:chris-lea/zeromq
+RUN apt-get update -qq
+RUN apt-get install -qqy libzmq3-dbg libzmq3-dev libzmq3
 
 # firewall rules to limit network access to the zeromq port only
+RUN apt-get install -qqy iptables
 RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 RUN iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT
 
