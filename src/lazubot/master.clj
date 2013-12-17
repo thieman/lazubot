@@ -1,4 +1,4 @@
-(ns lazubot.core
+(ns lazubot.master
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :refer [warn]]
             [clojure.set :refer [difference]]

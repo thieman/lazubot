@@ -8,7 +8,7 @@ Lazubot can be deployed using [Docker](http://www.docker.io/).
 
 ```
 git clone git@github.com:tthieman/lazubot
-docker build -t lazubot lazubot
+docker build -t lazubot - < lazubot/MasterDockerfile
 docker run lazubot
 ```
 
