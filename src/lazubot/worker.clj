@@ -21,7 +21,7 @@
     (loop []
       (when-let [message (String. (<!! reply-out))]
         (try
-          (>!! reply-in (eval-forms message))
+          (>!! reply-in (eval-form message))
           (catch Exception e
             (>!! reply-in (str e))))
         (recur)))))
