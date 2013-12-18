@@ -28,9 +28,9 @@
 (defn container-address
   "Return the IP address of a container by its ID."
   [container-id]
-  (get-in (client/get (docker-uri "/containers/" container-id "/json")
+  (get-in (client/get (docker-uri "containers/" container-id "/json")
                       {:as :json})
-          [:body :NetworkSettings :IpAddress]))
+          [:body :NetworkSettings :IPAddress]))
 
 (defn register-worker!
   "Add a worker doc to the workers ref."
@@ -39,13 +39,13 @@
    (commute workers assoc (:id worker-doc) worker-doc)))
 
 (defn eval-on-worker
-  "Send a Clojure form to a worker for evaluation. Return a channel
-  onto which the result will be posted."
-  [form]
+  "Send a collection of Clojure forms to a worker for evaluation.
+  Return a channel onto which the result will be posted."
+  [forms]
   (let [workers @workers
         worker-doc (get workers (first (keys workers)))
         result-channel (chan)]
-    (go (>! (:in worker-doc) form)
+    (go (>! (:in worker-doc) (cheshire/generate-string forms))
         (>! result-channel (String. (<! (:out worker-doc)))))))
 
 (defn add-worker! []
