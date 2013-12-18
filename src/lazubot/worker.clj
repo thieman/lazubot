@@ -11,6 +11,7 @@
     (register-socket! {:in reply-in :out reply-out :socket-type :rep
                        :configurator (fn [socket] (.bind socket addr))})
     (println "Worker initialized")
-    (when-let [message (String. (<!! reply-out))]
-      (>!! reply-in message)
-      (recur))))
+    (loop []
+      (when-let [message (String. (<!! reply-out))]
+        (>!! reply-in message)
+        (recur)))))
