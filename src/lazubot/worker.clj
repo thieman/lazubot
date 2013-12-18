@@ -17,4 +17,5 @@
                (recur)))
     (println "Worker initialized")
     (loop []
-      (Thread/sleep 5))))
+      (Thread/sleep 5)
+      (recur))))

@@ -112,4 +112,5 @@
                   (recur)))))
   (println "Lazubot listening for messages")
   (loop []
-    (Thread/sleep 5)))
+    (Thread/sleep 5)
+    (recur)))
