@@ -14,7 +14,7 @@
     (loop []
       (when-let [message (String. (<!! reply-out))]
         (try
-          (>!! reply-in (str (liberal-sandbox (read-string form))))
+          (>!! reply-in (str (liberal-sandbox (read-string message))))
           (catch Exception e
             (>!! reply-in (str e))))
         (recur)))))

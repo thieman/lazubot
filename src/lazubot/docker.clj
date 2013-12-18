@@ -49,6 +49,8 @@
         (>! result-channel (String. (<! (:out worker-doc)))))))
 
 (defn add-worker! []
+  "Start a new lazubot-worker container and add its worker-doc to the
+  workers ref."
   (let [container-id (run-new-container!)
         container-address (container-address container-id)
         [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))
