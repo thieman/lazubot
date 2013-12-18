@@ -22,6 +22,10 @@ ADD resources/public/wrapdocker /usr/local/bin/wrapdocker
 RUN chmod +x /usr/local/bin/docker /usr/local/bin/wrapdocker
 VOLUME /var/lib/docker
 
+# child container rootfs app armor workaround
+ADD resources/public/lxc-default /etc/apparmor.d/lxc/lxc-default
+RUN invoke-rc.d apparmor reload
+
 # copy over private config
 ADD resources/private /lazubot/resources/private
 
