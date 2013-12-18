@@ -1,9 +1,11 @@
 FROM thieman/clojure
 MAINTAINER Travis Thieman, travis.thieman@gmail.com
 
+ENV PORT 9999 # for docker API
+ENV LEIN_ROOT 1
+
 RUN git clone -b split https://github.com/tthieman/lazubot.git
 WORKDIR /lazubot
-ENV LEIN_ROOT 1
 RUN cd /lazubot; lein deps
 
 # workaround since Docker container overwrites initctl
@@ -27,9 +29,6 @@ ADD resources/public/lxc-default /etc/apparmor.d/lxc/lxc-default
 
 # copy over private config
 ADD resources/private /lazubot/resources/private
-
-# clients link to the master using Docker's linking facility
-EXPOSE 8080
 
 # run lazubot if no other arguments given to docker run
 CMD wrapdocker

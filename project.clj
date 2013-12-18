@@ -8,6 +8,8 @@
                  [org.clojure/core.async "0.1.262.0-151b23-alpha"]
                  [clojure-zulip "0.1.0-SNAPSHOT"]
                  [clojail "1.0.6"]
-                 [com.keminglabs/zmq-async "0.1.0"]]
+                 [com.keminglabs/zmq-async "0.1.0"]
+                 [clj-http "0.7.8"]
+                 [cheshire "5.2.0"]]
   :profiles {:master {:main lazubot.master}
              :worker {:main lazubot.worker}})
