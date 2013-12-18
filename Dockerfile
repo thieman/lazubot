@@ -13,7 +13,7 @@ RUN ln -s /bin/true /sbin/initctl
 # ZMQ
 RUN add-apt-repository -y ppa:chris-lea/zeromq
 RUN apt-get update -qq
-RUN apt-get install -qqy libzmq3-dbg libzmq3-dev libzmq3
+RUN apt-get install -qq -y libzmq3-dbg libzmq3-dev libzmq3
 
 # Docker in Docker support
 RUN apt-get install -qq -y iptables ca-certificates lxc
