@@ -28,9 +28,10 @@
 (defn container-address
   "Return the IP address of a container by its ID."
   [container-id]
-  (get-in (client/get (docker-uri "containers/" container-id "/json")
-                      {:as :json})
-          [:body :NetworkSettings :IPAddress]))
+  (let [ip (get-in (client/get (docker-uri "containers/" container-id "/json")
+                               {:as :json})
+                   [:body :NetworkSettings :IPAddress])]
+    (str "http://" ip ":" (:expose-port config))))
 
 (defn register-worker!
   "Add a worker doc to the workers ref."
