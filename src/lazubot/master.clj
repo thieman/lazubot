@@ -23,7 +23,7 @@
                        :configurator (fn [socket] (.bind socket addr))})
     (println (:out (sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "-" :in (slurp (io/resource "public/WorkerDockerfile")))))
     (println (:out (sh "docker" "run" "-rm=true" "-t" "-i" "-name client" "-link master:linked-master"
-        "lazubot-worker" "lein with-profile worker run")))
+        "lazubot-worker")))
     (go
      (>! request-in "hello there socket!")
      (println (<! request-out)))))

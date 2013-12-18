@@ -13,4 +13,5 @@
     (go-loop []
              (when-let [message (<! reply-in)]
                (>! reply-out message)
-               (recur)))))
+               (recur)))
+    (println "Worker initialized")))

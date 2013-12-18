@@ -16,7 +16,7 @@ RUN apt-get update -qq
 RUN apt-get install -qq -y libzmq3-dbg libzmq3-dev libzmq3
 
 # Docker in Docker support
-RUN apt-get install -qq -y iptables ca-certificates lxc
+RUN apt-get install -qq -y aufs-tools iptables ca-certificates lxc
 ADD resources/public/docker /usr/local/bin/docker
 ADD resources/public/wrapdocker /usr/local/bin/wrapdocker
 RUN chmod +x /usr/local/bin/docker /usr/local/bin/wrapdocker
