@@ -28,10 +28,9 @@
 (defn container-address
   "Return the IP address of a container by its ID."
   [container-id]
-  (let [ip (get-in (client/get (docker-uri "containers/" container-id "/json")
+  (get-in (client/get (docker-uri "containers/" container-id "/json")
                                {:as :json})
-                   [:body :NetworkSettings :IPAddress])]
-    (str "http://" ip ":" (:expose-port config))))
+                   [:body :NetworkSettings :IPAddress]))
 
 (defn register-worker!
   "Add a worker doc to the workers ref."
@@ -54,8 +53,9 @@
   workers ref."
   (let [container-id (run-new-container!)
         container-address (container-address container-id)
+        socket-address (str "tcp://" container-address ":" (:expose-port config))
         [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))
         worker-doc {:id container-id :in request-in :out request-out}]
     (register-socket! {:in request-in :out request-out :socket-type :req
-                       :configurator (fn [socket] (.connect socket container-address))})
+                       :configurator (fn [socket] (.connect socket socket-address))})
     (register-worker! worker-doc)))

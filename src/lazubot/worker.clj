@@ -6,12 +6,11 @@
 
 (def liberal-sandbox (sandbox []))
 
-(defn eval-forms
-  "Take in a JSON string of Clojure forms. Return a JSON string of
-  their evaluation docs."
-  [forms-json]
-  (let [forms (cheshire/parse-string forms-json)]
-    (cheshire/generate-string (map #(liberal-sandbox (read-string %)) forms))))
+(defn eval-form
+  "Take in a Clojure form string. Return a string of the evaluation
+  result."
+  [form-string]
+  (str (liberal-sandbox (read-string form-string))))
 
 (defn -main []
   (let [addr "tcp://eth0:8080"
