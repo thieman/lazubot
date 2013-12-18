@@ -9,7 +9,7 @@
   (let [addr "tcp://127.0.0.1:8080"
         [reply-in reply-out] (repeatedly 2 #(chan (sliding-buffer 64)))]
     (register-socket! {:in reply-in :out reply-out :socket-type :rep
-                       :configurator (fn [socket] (.connect socket addr))})
+                       :configurator (fn [socket] (.bind socket addr))})
     (go-loop []
              (when-let [message (<! reply-out)]
                (>! reply-in message)
