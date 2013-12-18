@@ -25,7 +25,7 @@
                        :configurator (fn [socket] (.connect socket addr))})
     (go
      (>! request-in "hello there socket!")
-     (println (<! request-out)))))
+     (println (String. (<! request-out))))))
 
 (defn ensure-subscriptions []
   (zulip/sync* (zulip/add-subscriptions conn bot-streams))
