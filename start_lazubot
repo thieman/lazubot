@@ -1,2 +1,2 @@
 docker build -no-cache=true -t=lazubot .
-docker run -privileged=true -lxc-conf="lxc.aa_profile=unconfined" -name=master =expose=8080 -t=true -i=true lazubot
+docker run -privileged=true -lxc-conf="lxc.aa_profile=unconfined" -name=lazubot-master -t=true -i=true lazubot

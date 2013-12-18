@@ -6,8 +6,8 @@
 (def sb (sandbox [])) ;; sandbox without any testers, only using timeout capability
 
 (defn -main []
-  (let [addr (get (System/getenv) "MASTER_PORT")
-        [reply-in reply-out] (repeatedly 2 #(chan (sliding-buffer 10)))]
+  (let [addr "tcp://127.0.0.1:8080"
+        [reply-in reply-out] (repeatedly 2 #(chan (sliding-buffer 64)))]
     (register-socket! {:in reply-in :out reply-out :socket-type :rep
                        :configurator (fn [socket] (.connect socket addr))})
     (go-loop []
