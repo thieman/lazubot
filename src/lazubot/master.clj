@@ -1,12 +1,13 @@
 (ns lazubot.master
   (:require [clojure.java.io :as io]
-            [clojure.java.shell :refer [sh]]
             [clojure.tools.logging :refer [warn]]
             [clojure.set :refer [difference]]
             [clojure.core.async :refer [<! >! go chan sliding-buffer]]
             [clojure-zulip.core :as zulip]
             [clojail.core :refer [sandbox]]
-            [com.keminglabs.zmq-async.core :refer [register-socket!]])
+            [com.keminglabs.zmq-async.core :refer [register-socket!]]
+            [clj-http.client :as client]
+            [lazubot.docker :as docker])
   (:import [java.io PushbackReader]))
 
 (def config (with-open [r (io/reader (io/resource "private/config"))]
@@ -15,17 +16,6 @@
 (def bot-streams ["test-stream"])
 (def num-goroutines 10)
 (def sb (sandbox [])) ;; sandbox without any testers, only using timeout capability
-
-(defn open-socket []
-  (let [addr "tcp://127.0.0.1:8080"
-        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))]
-    (println (sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public"))
-    (println (sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker"))
-    (register-socket! {:in request-in :out request-out :socket-type :req
-                       :configurator (fn [socket] (.connect socket addr))})
-    (go
-     (>! request-in "hello there socket!")
-     (println (String. (<! request-out))))))
 
 (defn ensure-subscriptions []
   (zulip/sync* (zulip/add-subscriptions conn bot-streams))
@@ -100,7 +90,7 @@
 
 (defn -main []
   (ensure-subscriptions)
-  (open-socket)
+  (docker/add-worker!)
   (let [queue-id (:queue_id (zulip/sync* (zulip/register conn ["message"])))
         messages (zulip/subscribe-events conn queue-id)]
     (dotimes [n num-goroutines]

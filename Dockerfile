@@ -1,7 +1,8 @@
 FROM thieman/clojure
 MAINTAINER Travis Thieman, travis.thieman@gmail.com
 
-ENV PORT 9999 # for docker API
+# PORT for docker API
+ENV PORT 9999
 ENV LEIN_ROOT 1
 
 RUN git clone -b split https://github.com/tthieman/lazubot.git
