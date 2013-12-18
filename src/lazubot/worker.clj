@@ -15,4 +15,6 @@
                (println (str "got " message))
                (>! reply-in message)
                (recur)))
-    (println "Worker initialized")))
+    (println "Worker initialized")
+    (loop []
+      (Thread/sleep 5))))

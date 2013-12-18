@@ -110,4 +110,6 @@
                     (catch Exception e
                       (warn e)))
                   (recur)))))
-  (println "Lazubot listening for messages"))
+  (println "Lazubot listening for messages")
+  (loop []
+    (Thread/sleep 5)))
