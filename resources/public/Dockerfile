@@ -1,3 +1,5 @@
+# This is the Dockerfile for the worker
+
 FROM thieman/clojure
 MAINTAINER Travis Thieman, travis.thieman@gmail.com
 
@@ -21,7 +23,7 @@ RUN useradd sandboxer
 RUN passwd -d -u sandboxer
 RUN mkdir /home/sandboxer
 RUN chown -R sandboxer /home/sandboxer
-ADD /lazubot/resources/public/java.policy /home/sandboxer/.java.policy
+ADD resources/public/java.policy /home/sandboxer/.java.policy
 
 # run lazubot if no other arguments given to docker run
 CMD lein with-profile worker run

@@ -21,9 +21,9 @@
         [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 10)))]
     (register-socket! {:in request-in :out request-out :socket-type :req
                        :configurator (fn [socket] (.bind socket addr))})
-    (println (:out (sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "-" :in (slurp (io/resource "public/WorkerDockerfile")))))
-    (println (:out (sh "docker" "run" "-rm=true" "-t" "-i" "-name client" "-link master:linked-master"
-        "lazubot-worker")))
+    (println (sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public"))
+    (println (sh "docker" "run" "-rm=true" "-d" "-name client"
+                 "-link master:linked-master" "lazubot-worker"))
     (go
      (>! request-in "hello there socket!")
      (println (<! request-out)))))
