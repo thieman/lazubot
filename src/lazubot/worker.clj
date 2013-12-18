@@ -6,7 +6,7 @@
 (def sb (sandbox [])) ;; sandbox without any testers, only using timeout capability
 
 (defn -main []
-  (let [addr "tcp://127.0.0.1:8080"
+  (let [addr "tcp://docker0:8080"
         [reply-in reply-out] (repeatedly 2 #(chan (sliding-buffer 64)))]
     (register-socket! {:in reply-in :out reply-out :socket-type :rep
                        :configurator (fn [socket] (.bind socket addr))})

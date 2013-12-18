@@ -18,11 +18,11 @@
 
 (defn open-socket []
   (let [addr "tcp://127.0.0.1:8080"
-        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 10)))]
-    (register-socket! {:in request-in :out request-out :socket-type :req
-                       :configurator (fn [socket] (.bind socket addr))})
+        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))]
     (println (sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public"))
     (println (sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker"))
+    (register-socket! {:in request-in :out request-out :socket-type :req
+                       :configurator (fn [socket] (.connect socket addr))})
     (go
      (>! request-in "hello there socket!")
      (println (<! request-out)))))
