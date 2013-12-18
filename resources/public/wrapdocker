@@ -77,6 +77,9 @@ do
 done
 popd >/dev/null
 
+# reload AppArmor profiles we updated in the Dockerfile
+invoke-rc.d apparmor reload
+
 if [ "$PORT" ]
 then
 	exec docker -d -H 0.0.0.0:$PORT
