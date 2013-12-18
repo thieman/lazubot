@@ -1,10 +1,12 @@
 (ns lazubot.docker
-  (:require [clojure.java.io :as io]
+  (:require [clojure.string :as string]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.core.async :refer [go chan sliding-buffer <! >!]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]
             [clj-http.client :as client]
-            [cheshire.core :as cheshire]))
+            [cheshire.core :as cheshire])
+  (:import [java.io PushbackReader]))
 
 (def config (with-open [r (io/reader (io/resource "private/config"))]
               (read (PushbackReader. r))))
@@ -19,7 +21,9 @@
   and return its ID."
   []
   (shell/sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public")
-  (shell/sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker"))
+  (-> (shell/sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker")
+      (:out)
+      (string/trim-newline)))
 
 (defn container-address
   "Return the IP address of a container by its ID."
@@ -42,7 +46,7 @@
         worker-doc (get workers (first (keys workers)))
         result-channel (chan)]
     (go (>! (:in worker-doc) form)
-        (>! result-channel (String. (<! (out worker-doc)))))))
+        (>! result-channel (String. (<! (:out worker-doc)))))))
 
 (defn add-worker! []
   (let [container-id (run-new-container!)
@@ -51,5 +55,4 @@
         worker-doc {:id container-id :in request-in :out request-out}]
     (register-socket! {:in request-in :out request-out :socket-type :req
                        :configurator (fn [socket] (.connect socket container-address))})
-    (register-worker! worker-doc)
-    (worker-listen! worker-doc)))
+    (register-worker! worker-doc)))

@@ -15,7 +15,6 @@
 (def conn (zulip/connection config))
 (def bot-streams ["test-stream"])
 (def num-goroutines 10)
-(def sb (sandbox [])) ;; sandbox without any testers, only using timeout capability
 
 (defn ensure-subscriptions []
   (zulip/sync* (zulip/add-subscriptions conn bot-streams))

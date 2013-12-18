@@ -3,7 +3,7 @@
             [clojure.core.async :refer [>!! <!! chan sliding-buffer]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]))
 
-(def sb (sandbox [])) ;; sandbox without any testers, only using timeout capability
+(def liberal-sandbox (sandbox []))
 
 (defn -main []
   (let [addr "tcp://eth0:8080"
@@ -13,5 +13,8 @@
     (println "Worker initialized")
     (loop []
       (when-let [message (String. (<!! reply-out))]
-        (>!! reply-in message)
+        (try
+          (>!! reply-in (str (liberal-sandbox (read-string form))))
+          (catch Exception e
+            (>!! reply-in (str e))))
         (recur)))))
