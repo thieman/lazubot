@@ -66,7 +66,7 @@
         worker-doc (get current-workers (first (keys current-workers)))
         result-channel (chan)]
     (go (>! (:in worker-doc) form)
-        (let [[response channel] (alts! (:out worker-doc) (timeout 10000))]
+        (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
           (if (= channel (:out worker-doc))
             (>! result-channel response)
             (replace-worker! worker-doc))))
