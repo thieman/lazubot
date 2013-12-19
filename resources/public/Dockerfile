@@ -26,8 +26,10 @@ RUN useradd sandboxer
 RUN passwd -d -u sandboxer
 RUN mkdir /home/sandboxer
 RUN chown -R sandboxer /home/sandboxer
-USER sandboxer
+RUN chown -R sandboxer /lazubot
 ADD java.policy /home/sandboxer/.java.policy
+
+USER sandboxer
 
 # run lazubot if no other arguments given to docker run
 CMD lein with-profile worker run
