@@ -14,7 +14,7 @@
               (read (PushbackReader. r))))
 (def conn (zulip/connection config))
 (def bot-streams ["test-stream"])
-(def num-goroutines 10)
+(def num-processors 10)
 
 (defn ensure-subscriptions []
   (zulip/sync* (zulip/add-subscriptions conn bot-streams))
@@ -62,12 +62,6 @@
         (recur (rest input) (str current-form current-char) forms
                false inside-quote? depth)))))
 
-(defn eval-form [form]
-  (try
-    (sb (read-string form))
-    (catch Exception e
-      e)))
-
 (defn allowed-form?
   "Return bool of whether a form is contained within a code block."
   [content form]
@@ -84,15 +78,17 @@
           forms (extract-forms content)
           allowed-forms (filter (partial allowed-form? content) forms)]
       (when (seq allowed-forms)
-        (let [reply (interpose "\n\n" (map #(str % "\n" "=> " (eval-form %)) allowed-forms))]
-          (respond message (apply str reply)))))))
+        (go (let [result-channel (docker/eval-on-worker (first allowed-forms))
+                  result (<! result-channel)
+                  reply (str (first allowed-forms) "\n\n" "=> " result)]
+              (respond message reply)))))))
 
 (defn -main []
   (ensure-subscriptions)
   (docker/add-worker!)
   (let [queue-id (:queue_id (zulip/sync* (zulip/register conn ["message"])))
         messages (zulip/subscribe-events conn queue-id)]
-    (dotimes [n num-goroutines]
+    (dotimes [n num-processors]
       (go (loop []
                   (try
                     (process-message (<! messages))
