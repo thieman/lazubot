@@ -95,15 +95,17 @@
   "Send a Clojure form string to a worker for evaluation.  Return a
   channel onto which the result will be posted."
   [form]
-  (go-loop [form form]
-   (let [worker-doc (acquire-worker-doc!)]
-     (if-not worker-doc
-       (do (<! (timeout 500))
-           (recur form))
-       (let [result-channel (chan)]
-         (>! (:in worker-doc) form)
-         (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
-           (if (= channel (:out worker-doc))
-             (>! result-channel (String. response))
-             (replace-worker! worker-doc)))
-         result-channel)))))
+  (let [result-channel (chan)]
+    (go-loop [form form]
+             (let [worker-doc (acquire-worker-doc!)]
+               (if-not worker-doc
+                 (do (<! (timeout 500))
+                     (recur form))
+                 (let [result-channel (chan)]
+                   (>! (:in worker-doc) form)
+                   (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
+                     (if (nil? response)
+                       (do (replace-worker! worker-doc)
+                           (>! result-channel (str "Evaluation timed out")))
+                       (>! result-channel (String. response))))))))
+    result-channel))
