@@ -3,7 +3,7 @@
 FROM thieman/clojure
 MAINTAINER Travis Thieman, travis.thieman@gmail.com
 
-RUN git clone -b split https://github.com/tthieman/lazubot.git
+RUN git clone https://github.com/tthieman/lazubot.git
 WORKDIR /lazubot
 ENV LEIN_ROOT 1
 RUN cd /lazubot; lein deps

@@ -5,7 +5,7 @@ MAINTAINER Travis Thieman, travis.thieman@gmail.com
 ENV PORT 9999
 ENV LEIN_ROOT 1
 
-RUN git clone -b split https://github.com/tthieman/lazubot.git
+RUN git clone https://github.com/tthieman/lazubot.git
 WORKDIR /lazubot
 RUN cd /lazubot; lein deps
 
