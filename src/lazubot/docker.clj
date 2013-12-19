@@ -58,6 +58,14 @@
   (dosync
    (commute workers assoc (:id worker-doc) worker-doc)))
 
+(defn ping-worker-for-unlock!
+  "Send a ping to a newly created worker. When a response is received,
+  unlock the worker for use."
+  [worker-doc]
+  (go (>! (:in worker-doc) "(str \"PING\")")
+      (<! (:out worker-doc))
+      (unlock-worker! worker-doc)))
+
 (defn add-worker! []
   "Start a new lazubot-worker container and add its worker-doc to the
   workers ref."
@@ -66,10 +74,11 @@
         socket-address (str "tcp://" container-address ":" (:expose-port config))
         [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))
         worker-doc {:id container-id :in request-in :out request-out
-                    :address socket-address :locked false}]
+                    :address socket-address :locked true}]
     (register-socket! {:in request-in :out request-out :socket-type :req
                        :configurator (fn [socket] (.connect socket socket-address))})
-    (register-worker! worker-doc)))
+    (register-worker! worker-doc)
+    (ping-worker-for-unlock! worker-doc)))
 
 (defn replace-worker!
   "Remove the given worker from the workers ref, kill and remove it in
