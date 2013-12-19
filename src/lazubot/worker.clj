@@ -19,7 +19,9 @@
       (when-let [message (String. (<!! reply-out))]
         (println (str "Received " message))
         (try
-          (>!! reply-in (eval-form message))
+          (let [evaluated (eval-form message)]
+            (println (str "Sending " evaluated))
+            (>!! reply-in evaluated))
           (catch Exception e
             (>!! reply-in (str e))))
         (recur)))))
