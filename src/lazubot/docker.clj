@@ -86,6 +86,8 @@
   [worker-doc]
   (dosync
    (commute workers dissoc (:id worker-doc)))
+  (shell/sh "docker" "kill" (:id worker-doc))
+  (shell/sh "docker" "rm" (:id worker-doc))
   (add-worker!))
 
 (defn acquire-worker-doc!
