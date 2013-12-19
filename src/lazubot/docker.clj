@@ -1,6 +1,7 @@
 (ns lazubot.docker
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
+            [clojure.tools.logging :refer [debug info warn]]
             [clojure.java.shell :as shell]
             [clojure.core.async :refer [go go-loop chan sliding-buffer <! >! timeout alts!]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]
@@ -20,14 +21,17 @@
   "Build the worker image. Should only need to do this once unless you
   want to do a fresh pull of the repository."
   []
+  (info "Building lazubot-worker container")
   (shell/sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public"))
 
 (defn run-new-container!
   "Start a new worker container and return its ID."
   []
-  (-> (shell/sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker")
-      (:out)
-      (string/trim-newline)))
+  (let [container-id (-> (shell/sh "docker" "run" "-d=true" "-expose=8080" "lazubot-worker")
+                         (:out)
+                         (string/trim-newline))]
+    (info "Started container " container-id)
+    container-id))
 
 (defn container-address
   "Return the IP address of a container by its ID."

@@ -1,6 +1,6 @@
 (ns lazubot.master
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :refer [warn]]
+            [clojure.tools.logging :refer [debug info warn]]
             [clojure.set :refer [difference]]
             [clojure.core.async :refer [<! >! go chan sliding-buffer]]
             [clojure-zulip.core :as zulip]

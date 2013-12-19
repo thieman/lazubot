@@ -1,5 +1,6 @@
 (ns lazubot.worker
-  (:require [clojure.core.async :refer [>!! <!! chan sliding-buffer]]
+  (:require [clojure.tools.logging :refer [debug info warn]]
+            [clojure.core.async :refer [>!! <!! chan sliding-buffer]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]
             [cheshire.core :as cheshire]))
 
@@ -17,9 +18,12 @@
     (println "Worker initialized")
     (loop []
       (when-let [message (String. (<!! reply-out))]
+        (debug "IN: " message)
         (try
           (let [evaluated (eval-form message)]
+            (debug "OUT: " evaluated)
             (>!! reply-in evaluated))
           (catch Exception e
+            (debug "EXCEPTION: " e)
             (>!! reply-in (str e))))
         (recur)))))
