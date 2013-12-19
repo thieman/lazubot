@@ -100,6 +100,6 @@
          (>! (:in worker-doc) form)
          (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
            (if (= channel (:out worker-doc))
-             (>! result-channel response)
+             (>! result-channel (String. response))
              (replace-worker! worker-doc)))
          result-channel)))))
