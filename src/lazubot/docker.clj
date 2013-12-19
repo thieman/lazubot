@@ -101,11 +101,10 @@
                (if-not worker-doc
                  (do (<! (timeout 500))
                      (recur form))
-                 (let [result-channel (chan)]
-                   (>! (:in worker-doc) form)
-                   (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
-                     (if (nil? response)
-                       (do (replace-worker! worker-doc)
-                           (>! result-channel (str "Evaluation timed out")))
-                       (>! result-channel (String. response))))))))
+                 (do (>! (:in worker-doc) form)
+                     (let [[response channel] (alts! [(:out worker-doc) (timeout 10000)])]
+                       (if (nil? response)
+                         (do (replace-worker! worker-doc)
+                             (>! result-channel (str "Evaluation timed out")))
+                         (>! result-channel (String. response))))))))
     result-channel))
