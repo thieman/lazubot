@@ -38,6 +38,18 @@
   (dosync
    (commute workers assoc (:id worker-doc) worker-doc)))
 
+(defn add-worker! []
+  "Start a new lazubot-worker container and add its worker-doc to the
+  workers ref."
+  (let [container-id (run-new-container!)
+        container-address (container-address container-id)
+        socket-address (str "tcp://" container-address ":" (:expose-port config))
+        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))
+        worker-doc {:id container-id :in request-in :out request-out}]
+    (register-socket! {:in request-in :out request-out :socket-type :req
+                       :configurator (fn [socket] (.connect socket socket-address))})
+    (register-worker! worker-doc)))
+
 (defn replace-worker!
   "Called upon worker death. Remove the given worker and spin up a new
   one."
@@ -59,15 +71,3 @@
             (>! result-channel response)
             (replace-worker! worker-doc))))
     result-channel))
-
-(defn add-worker! []
-  "Start a new lazubot-worker container and add its worker-doc to the
-  workers ref."
-  (let [container-id (run-new-container!)
-        container-address (container-address container-id)
-        socket-address (str "tcp://" container-address ":" (:expose-port config))
-        [request-in request-out] (repeatedly 2 #(chan (sliding-buffer 64)))
-        worker-doc {:id container-id :in request-in :out request-out}]
-    (register-socket! {:in request-in :out request-out :socket-type :req
-                       :configurator (fn [socket] (.connect socket socket-address))})
-    (register-worker! worker-doc)))
