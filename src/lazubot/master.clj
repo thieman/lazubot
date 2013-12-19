@@ -84,6 +84,7 @@
 
 (defn -main []
   (ensure-subscriptions)
+  (docker/build-container!)
   (docker/add-worker!)
   (let [queue-id (:queue_id (zulip/sync* (zulip/register conn ["message"])))
         messages (zulip/subscribe-events conn queue-id)]
