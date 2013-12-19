@@ -2,7 +2,7 @@
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.core.async :refer [go chan sliding-buffer <! >! timeout alts!]]
+            [clojure.core.async :refer [go go-loop chan sliding-buffer <! >! timeout alts!]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]
             [clj-http.client :as client]
             [cheshire.core :as cheshire])
