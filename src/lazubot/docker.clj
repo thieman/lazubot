@@ -19,6 +19,7 @@
 (defn build-container!
   "Build the worker image. Should only need to do this once unless you
   want to do a fresh pull of the repository."
+  []
   (shell/sh "docker" "build" "-no-cache=true" "-t=lazubot-worker" "resources/public"))
 
 (defn run-new-container!
