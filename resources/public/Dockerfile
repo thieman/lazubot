@@ -15,20 +15,19 @@ RUN apt-get install -qq -y libzmq3-dbg libzmq3-dev libzmq3
 
 # firewall rules to limit network access to the zeromq port only
 RUN apt-get install -qq -y iptables aufs-tools
+RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+RUN iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT
 RUN iptables -P INPUT DROP
 RUN iptables -P FORWARD DROP
 RUN iptables -P OUTPUT DROP
-RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
-RUN iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT
 
 # set up sandboxer user so iptables are secure
 RUN useradd sandboxer
 RUN passwd -d -u sandboxer
 RUN mkdir /home/sandboxer
 RUN chown -R sandboxer /home/sandboxer
-RUN chown -R sandboxer /lazubot
 ADD java.policy /home/sandboxer/.java.policy
-
+RUN chown -R sandboxer /lazubot
 USER sandboxer
 
 # run lazubot if no other arguments given to docker run
