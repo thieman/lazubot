@@ -23,11 +23,11 @@ RUN sudo -u sandboxer lein deps
 
 # firewall rules to limit network access to the zeromq port only
 RUN apt-get install -qq -y iptables-persistent aufs-tools
-RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT ;
-	iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT ;
-	iptables -P INPUT DROP ;
-	iptables -P FORWARD DROP ;
-	iptables -P OUTPUT DROP ;
+RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT ;\
+	iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT ;\
+	iptables -P INPUT DROP ;\
+	iptables -P FORWARD DROP ;\
+	iptables -P OUTPUT DROP ;\
 	iptables-save > /etc/iptables/rules.v4
 
 USER sandboxer
