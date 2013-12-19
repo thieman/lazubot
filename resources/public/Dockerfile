@@ -16,7 +16,7 @@ RUN apt-get install -qq -y libzmq3-dbg libzmq3-dev libzmq3
 # firewall rules to limit network access to the zeromq port only
 RUN apt-get install -qq -y iptables aufs-tools
 RUN iptables -P INPUT DROP
-RUN iptables -P FORWARD REJECT
+RUN iptables -P FORWARD DROP
 RUN iptables -P OUTPUT DROP
 RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 RUN iptables -A OUTPUT -p tcp --sport 8080 -j ACCEPT
