@@ -18,12 +18,12 @@
     (println "Worker initialized")
     (loop []
       (when-let [message (String. (<!! reply-out))]
-        (debug "IN: " message)
+        (info "IN: " message)
         (try
           (let [evaluated (eval-form message)]
-            (debug "OUT: " evaluated)
+            (info "OUT: " evaluated)
             (>!! reply-in evaluated))
           (catch Exception e
-            (debug "EXCEPTION: " e)
+            (info "EXCEPTION: " e)
             (>!! reply-in (str e))))
         (recur)))))

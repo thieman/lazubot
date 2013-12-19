@@ -106,5 +106,6 @@
                        (if (nil? response)
                          (do (replace-worker! worker-doc)
                              (>! result-channel (str "Evaluation timed out")))
-                         (>! result-channel (String. response))))))))
+                         (do (unlock-worker! worker-doc)
+                             (>! result-channel (String. response)))))))))
     result-channel))
