@@ -32,5 +32,6 @@ RUN service iptables-persistent start
 
 USER sandboxer
 
-# run lazubot if no other arguments given to docker run
-CMD lein with-profile worker run
+# set iptables and run lazubot if no other arguments given to docker run
+CMD iptables-restore < /etc/iptables/rules.v4 &&\
+	sudo -u sandboxer lein with-profile worker run
