@@ -46,7 +46,10 @@
         worker-doc (get workers (first (keys workers)))
         result-channel (chan)]
     (go (>! (:in worker-doc) form)
-        (>! result-channel (String. (<! (:out worker-doc)))))))
+        (let [response (String. (<! (:out worker-doc)))]
+          (println (str "Received " response))
+          (>! result-channel response)))
+    result-channel))
 
 (defn add-worker! []
   "Start a new lazubot-worker container and add its worker-doc to the
