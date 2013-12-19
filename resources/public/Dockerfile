@@ -30,8 +30,6 @@ RUN iptables -A INPUT -p tcp --dport 8080 -j ACCEPT &&\
 	iptables-save > /etc/iptables/rules.v4
 RUN service iptables-persistent start
 
-USER sandboxer
-
 # set iptables and run lazubot if no other arguments given to docker run
 CMD iptables-restore < /etc/iptables/rules.v4 &&\
 	sudo -u sandboxer lein with-profile worker run
