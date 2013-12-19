@@ -78,6 +78,7 @@
           forms (extract-forms content)
           allowed-forms (filter (partial allowed-form? content) forms)]
       (when (seq allowed-forms)
+        (println (str "Sending form " (first allowed-forms) " for evaulation"))
         (go (let [result-channel (docker/eval-on-worker (first allowed-forms))
                   result (<! result-channel)
                   reply (str (first allowed-forms) "\n\n" "=> " result)]

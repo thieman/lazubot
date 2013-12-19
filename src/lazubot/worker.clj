@@ -20,6 +20,7 @@
     (println "Worker initialized")
     (loop []
       (when-let [message (String. (<!! reply-out))]
+        (println (str "Received " message))
         (try
           (>!! reply-in (eval-form message))
           (catch Exception e
