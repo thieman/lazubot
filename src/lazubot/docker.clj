@@ -2,7 +2,7 @@
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.core.async :refer [go chan sliding-buffer <! >!]]
+            [clojure.core.async :refer [go chan sliding-buffer <! >! timeout alts!]]
             [com.keminglabs.zmq-async.core :refer [register-socket!]]
             [clj-http.client :as client]
             [cheshire.core :as cheshire])
@@ -38,17 +38,26 @@
   (dosync
    (commute workers assoc (:id worker-doc) worker-doc)))
 
+(defn replace-worker!
+  "Called upon worker death. Remove the given worker and spin up a new
+  one."
+  [worker-doc]
+  (dosync
+   (commute workers dissoc (:id worker-doc)))
+  (add-worker!))
+
 (defn eval-on-worker
   "Send a Clojure form string to a worker for evaluation.  Return a
   channel onto which the result will be posted."
   [form]
-  (let [workers @workers
-        worker-doc (get workers (first (keys workers)))
+  (let [current-workers @workers
+        worker-doc (get current-workers (first (keys current-workers)))
         result-channel (chan)]
     (go (>! (:in worker-doc) form)
-        (let [response (String. (<! (:out worker-doc)))]
-          (println (str "Received " response))
-          (>! result-channel response)))
+        (let [[response channel] (alts! (:out worker-doc) (timeout 10000))]
+          (if (= channel (:out worker-doc))
+            (>! result-channel response)
+            (replace-worker! worker-doc))))
     result-channel))
 
 (defn add-worker! []
