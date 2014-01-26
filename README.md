@@ -7,7 +7,7 @@ A Zulip bot that runs arbitrary, un-sandboxed Clojure code. Currently stalking a
 Lazubot can be deployed using [Docker](http://www.docker.io/).
 
 ```
-git clone git@github.com:tthieman/lazubot
+git clone git@github.com:thieman/lazubot
 lazubot/start_lazubot  # see this script for the full Docker commands
 ```
 
